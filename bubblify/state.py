@@ -25,6 +25,7 @@ from bubblify.helpers.sql_helpers import (
 )
 from quickstart import main
 
+
 llm = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
 
 
