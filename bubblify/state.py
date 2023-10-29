@@ -282,6 +282,7 @@ class State(rx.State):
     prev_pos_x: float = 0
     prev_pos_y: float = 0
     in_focus: bool = False
+    messages: list[list[tuple[str]]] = []
 
     def get_clusters(self):
         """Get the clusters from the database.
@@ -296,6 +297,17 @@ class State(rx.State):
                 clusters[message["category_name"]] = []
             clusters[message["category_name"]].append(message)
 
+        for category in clusters:
+            msgs = []
+            for msg in clusters[category]:
+                msgs.append((msg["snippet"], msg["sender"], msg["date_received"], msg["subject"], msg["unread"]))
+            
+            self.messages.append(msgs)
+
+        print(self.messages)
+
+
+        output = self.messages
         diameters = self.get_diameters(clusters)
         positions = self.get_positions(clusters, diameters)
         colors = self.get_colors(clusters)
