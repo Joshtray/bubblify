@@ -2,6 +2,8 @@
 import os
 from dotenv import load_dotenv
 import mindsdb_sdk
+import numpy as np
+import json
 
 load_dotenv()
 
@@ -47,9 +49,17 @@ except:
         engine='openai_engine',
         api_key=openai_key,
         predict='email_classification',
-        prompt_template='Classify each of the following email informations into one of the provided clusters: {{clusters}}. Respond with just a list of your classifications and no other text, for example: [URGENT]. Consider the following information during classification: 1. If the email contains a deadline and strong language, it should be classified as Urgent.2. If the email subject contains the word urgent, it should be classified as Urgent. Now, analyze the email information and make your classification for each of the following: {{emails_list}}',
+        prompt_template="""You are an intelligent classifier of emails.
+        
+        For the following emails, please categorize them as one of the following: {{clusters}}
+        
+        Emails: {{emails_list}}
+        
+        Return only the category name in the following format (each separated by a new comma):
+        
+        <category_name>, <category_name>, <category_name>
+        """,
         max_tokens=3300,
-        temperature=0.8,
     )
 
 email_table = email_db.get_table('emails_info')
@@ -74,12 +84,20 @@ emails_info = [
         "date_received": "2023-10-27",
         "unread": True,
         "category_name": "INBOX"
+    },
+    {
+        "sender": "John Dare <john.doe@sample.com>",
+        "snippet": "Hello, would you like to make some dough?",
+        "subject": "Make some friends",
+        "date_received": "2023-10-27",
+        "unread": True,
+        "category_name": "INBOX"
     }]
 emails_list = []
 for email in emails_info:
     emails_list.append("{Email Title}: %s|{Email Sender}: %s|{Email Send date}: %s|{Email Body}: %s|{Was email unread}: %s" % (
         email["subject"], email["sender"], email["date_received"], email["snippet"], email["unread"]))
-emails_list = "[" + ','.join(emails_list) + "]"
+emails_list = "[" + ', '.join(emails_list) + "]"
 
 """
 EXAMPLE OF CLUSTERS LIST
@@ -90,4 +108,5 @@ clusters = "[" + ','.join(clusters) + "]"
 query = project.query(
     f"SELECT email_classification FROM email_classifier WHERE emails_list = \"{emails_list}\" AND clusters = \"{clusters}\";")
 
-print(query.fetch())
+email_clusters = np.array(query.fetch())[0][0].split(", ")
+print(email_clusters)
