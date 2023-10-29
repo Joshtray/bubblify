@@ -209,7 +209,7 @@ class State(rx.State):
 
             y = random.uniform(-(800 - diameter)/2, (800 - diameter)/2)
             
-            positions.append((x, y - (diameter/2)))
+            positions.append((str(x) + "px", str(y - (diameter/2)) + "px"))
         return positions
     
     def get_colors(self, clusters):
@@ -226,10 +226,11 @@ class State(rx.State):
         Returns:
             The new bubble size.
         """
-        new_cluster = list(cluster)
-        new_cluster[self.diameter_index] = cluster[self.diameter_index] * 1.1
+        if not self.in_focus:
+            new_cluster = list(cluster)
+            new_cluster[self.diameter_index] = cluster[self.diameter_index] * 1.1
 
-        self.clusters[cluster[self.index_index]] = tuple(new_cluster)
+            self.clusters[cluster[self.index_index]] = tuple(new_cluster)
     
     def mouse_leave(self, cluster):
         """Mouse leave the bubble.
@@ -237,11 +238,11 @@ class State(rx.State):
         Returns:
             The new bubble size.
         """
-        new_cluster = list(cluster)
-        new_cluster[self.diameter_index] = cluster[self.diameter_index] / 1.1
+        if not self.in_focus:
+            new_cluster = list(cluster)
+            new_cluster[self.diameter_index] = cluster[self.diameter_index] / 1.1
 
-        self.clusters[cluster[self.index_index]] = tuple(new_cluster)
-        self.clusters = cluster
+            self.clusters[cluster[self.index_index]] = tuple(new_cluster)
     
     
     def bubble_click(self, cluster):
@@ -250,19 +251,20 @@ class State(rx.State):
         Returns:
             The new bubble size.
         """
-        self.in_focus = True
-        self.prev_index = cluster[self.index_index]
-        self.prev_diameter = cluster[self.diameter_index]
-        self.prev_pos_x = cluster[self.positionx_index]
-        self.prev_pos_y = cluster[self.positiony_index]
+        if not self.in_focus:
+            self.in_focus = True
+            self.prev_index = cluster[self.index_index]
+            self.prev_diameter = cluster[self.diameter_index]
+            self.prev_pos_x = cluster[self.positionx_index]
+            self.prev_pos_y = cluster[self.positiony_index]
 
-        new_cluster = list(cluster)
-        new_cluster[self.diameter_index] = cluster[self.diameter_index] * 2 
-        new_cluster[self.positionx_index] = -(new_cluster[self.diameter_index] / 2)
-        new_cluster[self.positiony_index] = -(new_cluster[self.diameter_index] / 2)
-        new_cluster[self.z_index_index] = 3
+            new_cluster = list(cluster)
+            new_cluster[self.diameter_index] = "90vh"
+            new_cluster[self.positionx_index] = "-45vh"
+            new_cluster[self.positiony_index] = "-45vh"
+            new_cluster[self.z_index_index] = 3
 
-        self.clusters[cluster[self.index_index]] = tuple(new_cluster)
+            self.clusters[cluster[self.index_index]] = tuple(new_cluster)
 
     def bubble_close(self):
         """Close the bubble.
