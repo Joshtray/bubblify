@@ -1,5 +1,7 @@
 """Base state for the app."""
 
+from langchain.chat_models import ChatOpenAI
+
 import os
 
 import reflex as rx
@@ -22,6 +24,8 @@ from bubblify.helpers.sql_helpers import (
     create_emails_info_table,
 )
 from quickstart import main
+
+llm = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
 
 
 class State(rx.State):
@@ -158,7 +162,7 @@ class State(rx.State):
         "#d27cbf",
         "#7cbfd2",
     ]
-    cluster_names: list[str] = ["Work", "School"]
+    cluster_names: list[str] = ["Work", "Social", "Urgent", "Other"]
     new_cluster_name: str = ""
     current_email: str = ""
     current_password: str = ""
@@ -374,3 +378,47 @@ class State(rx.State):
         main()
         self.email_data = get_json_from_database()
         self.have_emails = True
+        self.categorize()
+
+    def categorize(self):
+        # Doing this in chunks of 10 emails at a time
+
+        for i in range(0, len(self.email_data), 10):
+            prompt = f"""
+            For the following emails, please categorize them as one of the following:
+            {self.cluster_names}
+            
+            Emails: {self.email_data[i:i+10]}\n
+            
+            Return only the category name in the following format (each separated by a new line)):
+            
+            <category_name>
+            <category_name>
+            <category_name>
+            """
+
+            response = llm.predict(prompt)
+            response = response.split("\n")
+            for j in range(len(response)):
+                self.email_data[i + j]["category_name"] = response[j]
+
+        # for i, email in enumerate(self.email_data):
+        #     prompt = f"""
+        #     For the following email, please categorize it as one of the following:
+        #     {self.cluster_names}
+
+        #     Email: {email['snippet']}\n
+        #     Sender: {email['sender']}\n
+        #     Subject: {email['subject']}\n
+        #     Date: {email['date_received']}\n
+        #     Unread: {email['unread']}\n
+
+        #     Return only the category name in the following format:
+
+        #     <category_name>
+        #     """
+
+        #     response = llm.predict(prompt)
+        #     self.email_data[i]["category_name"] = response
+
+        self.get_clusters()
