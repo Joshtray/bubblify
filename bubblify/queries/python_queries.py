@@ -12,6 +12,7 @@ db_port = os.getenv('DB_PORT')
 db_pwd = os.getenv('DB_PWD')
 minds_user = os.getenv('MINDS_USER')
 minds_pwd = os.getenv('MINDS_PWD')
+openai_key = os.getenv('OPENAI_API_KEY')
 
 server = mindsdb_sdk.connect(
     login=minds_user, password=minds_pwd)
@@ -44,6 +45,7 @@ except:
     email_classifier = project.models.create(
         name='email_classifier',
         engine='openai_engine',
+        api_key=openai_key,
         predict='email_classification',
         prompt_template='Classify each of the following email informations into one of the provided clusters: {{clusters}}. Respond with just a list of your classifications and no other text, for example: [URGENT]. Consider the following information during classification: 1. If the email contains a deadline and strong language, it should be classified as Urgent.2. If the email subject contains the word urgent, it should be classified as Urgent. Now, analyze the email information and make your classification for each of the following: {{emails_list}}',
         max_tokens=3300,
@@ -86,6 +88,6 @@ clusters = ['Routine', 'Important', 'Urgent',
             'Job Applications', 'Miscellaneous']
 clusters = "[" + ','.join(clusters) + "]"
 query = project.query(
-    f"SELECT email_classification FROM mindsdb.models.email_classifier WHERE emails_list = \"{emails_list}\" AND clusters = \"{clusters}\";")
-query.fetch()
-print(query)
+    f"SELECT email_classification FROM email_classifier WHERE emails_list = \"{emails_list}\" AND clusters = \"{clusters}\";")
+
+print(query.fetch())
