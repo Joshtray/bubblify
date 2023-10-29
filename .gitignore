@@ -5,3 +5,6 @@ __pycache__/
 venv/
 .env
 credentials.json
+token.json
+certs/ca.crt
+my-safe-directory/ca.key
