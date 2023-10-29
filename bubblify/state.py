@@ -176,7 +176,7 @@ class State(rx.State):
             "subject": "[Joshtray/bubblify] Google OAuth2 Keys exposed on GitHub",
             "date_received": "2023-10-28",
             "unread": False,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "John Doe <john.doe@example.com>",
@@ -184,7 +184,7 @@ class State(rx.State):
             "subject": "Project Progress",
             "date_received": "2023-10-27",
             "unread": True,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "Alice Smith <alice.smith@example.com>",
@@ -192,7 +192,7 @@ class State(rx.State):
             "subject": "Meeting Reminder",
             "date_received": "2023-10-26",
             "unread": False,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "Support Team <support@example.com>",
@@ -200,7 +200,7 @@ class State(rx.State):
             "subject": "Support Ticket Resolution",
             "date_received": "2023-10-25",
             "unread": False,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "Jane Williams <jane.williams@example.com>",
@@ -208,7 +208,7 @@ class State(rx.State):
             "subject": "Weekly Report",
             "date_received": "2023-10-24",
             "unread": True,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "Free Offers <offers@example.com>",
@@ -216,7 +216,7 @@ class State(rx.State):
             "subject": "Free Cruise Offer",
             "date_received": "2023-10-27",
             "unread": False,
-            "category_name": "Spam"
+            "category_name": "Spam",
         },
         {
             "sender": "Growth Hacks <hacks@example.com>",
@@ -224,7 +224,7 @@ class State(rx.State):
             "subject": "Investment Opportunity",
             "date_received": "2023-10-26",
             "unread": False,
-            "category_name": "Spam"
+            "category_name": "Spam",
         },
         {
             "sender": "Unsolicited Newsletter <newsletter@example.com>",
@@ -232,7 +232,7 @@ class State(rx.State):
             "subject": "Weekly Newsletter",
             "date_received": "2023-10-25",
             "unread": False,
-            "category_name": "Spam"
+            "category_name": "Spam",
         },
         {
             "sender": "Amazon Deals <deals@amazon.com>",
@@ -240,7 +240,7 @@ class State(rx.State):
             "subject": "Amazon Promotions",
             "date_received": "2023-10-28",
             "unread": False,
-            "category_name": "Promotions"
+            "category_name": "Promotions",
         },
         {
             "sender": "Tech Store <info@techstore.com>",
@@ -248,7 +248,7 @@ class State(rx.State):
             "subject": "Tech Store Promotion",
             "date_received": "2023-10-27",
             "unread": False,
-            "category_name": "Promotions"
+            "category_name": "Promotions",
         },
         {
             "sender": "Fashion Outlet <sales@fashionoutlet.com>",
@@ -256,7 +256,7 @@ class State(rx.State):
             "subject": "Fashion Outlet Sale",
             "date_received": "2023-10-26",
             "unread": False,
-            "category_name": "Promotions"
+            "category_name": "Promotions",
         },
         {
             "sender": "Travel Discounts <info@traveldiscounts.com>",
@@ -264,7 +264,7 @@ class State(rx.State):
             "subject": "Travel Discounts",
             "date_received": "2023-10-25",
             "unread": False,
-            "category_name": "Promotions"
+            "category_name": "Promotions",
         },
         {
             "sender": "Food Delivery <offers@fooddelivery.com>",
@@ -272,10 +272,9 @@ class State(rx.State):
             "subject": "Food Delivery Discount",
             "date_received": "2023-10-24",
             "unread": False,
-            "category_name": "Promotions"
-        }
+            "category_name": "Promotions",
+        },
     ]
-    
 
     prev_index: int = 0
     prev_diameter: float = 0
@@ -290,7 +289,7 @@ class State(rx.State):
             The clusters.
         """
 
-        clusters = {}
+        clusters = {i: [] for i in self.cluster_names}
         for message in self.email_data:
             if message["category_name"] not in clusters:
                 clusters[message["category_name"]] = []
@@ -315,7 +314,7 @@ class State(rx.State):
             )
             for i, name in enumerate(clusters)
         ]
-        
+
     def get_diameters(self, clusters):
         """Get the diameters of the clusters.
 
@@ -366,15 +365,18 @@ class State(rx.State):
             The colors.
         """
         return random.sample(self.colors, k=len(clusters))
-    
+
     def get_unread_count(self, clusters):
         """Get the unread count of the cluster.
 
         Returns:
             The unread count.
         """
-        return [len([message for message in clusters[cluster] if message["unread"]]) for cluster in clusters]
-    
+        return [
+            len([message for message in clusters[cluster] if message["unread"]])
+            for cluster in clusters
+        ]
+
     def mouse_enter(self, cluster):
         """Mouse enter the bubble.
 
@@ -444,8 +446,9 @@ class State(rx.State):
         Args:
             cluster_name: The name of the cluster to add.
         """
-        if cluster_name not in self.clusters:
-            self.clusters[cluster_name] = []
+        if cluster_name in self.cluster_names or cluster_name == "":
+            rx.alert("Please enter a unique cluster name")
+        else:
             self.cluster_names.append(cluster_name)
 
     def delete_cluster(self, cluster_name):
@@ -453,11 +456,9 @@ class State(rx.State):
         Args:
             cluster_name: The name of the cluster to delete.
         """
-        for i in range(len(self.clusters)):
-            if self.clusters[i][1] == cluster_name:
-                self.clusters.pop(i)
+        for i in range(len(self.clusters) - 1, -1, -1):
+            if self.cluster_names[i][self.name_index] == cluster_name:
                 self.cluster_names.pop(i)
-                break
 
     def set_new_cluster_name(self, new_cluster_name):
         """

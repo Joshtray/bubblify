@@ -5,6 +5,7 @@ from bubblify.state import State
 
 import reflex as rx
 
+
 def sidebar_item(text: str, icon: str, url: str) -> rx.Component:
     """Sidebar item.
 
@@ -17,10 +18,11 @@ def sidebar_item(text: str, icon: str, url: str) -> rx.Component:
         rx.Component: The sidebar item component.
     """
     # Whether the item is active.
-    active = (State.router.page.path == f"/{text.lower()}") | (
-        (State.router.page.path == "/") & text == "Home"
-    ) | (State.router.page.path == "/add-cluster") & (text == "Add Cluster")
-
+    active = (
+        (State.router.page.path == f"/{text.lower()}")
+        | ((State.router.page.path == "/") & text == "Home")
+        | (State.router.page.path == "/add-cluster") & (text == "Add Cluster")
+    )
 
     return rx.link(
         rx.hstack(
@@ -69,11 +71,24 @@ def sidebar() -> rx.Component:
                     )
                     for page in get_decorated_pages()
                 ],
+                rx.hstack(
+                    rx.button(
+                        rx.image(
+                            src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Refresh_icon.png",
+                        ),
+                        on_click=State.categorize,
+                    ),
+                    border_radius="50%",
+                    box_shadow=styles.box_shadow,
+                    width="80px",
+                    height="80px",
+                    padding="0.9em",
+                    margin="0.5em",
+                ),
                 width="100%",
                 overflow_y="auto",
                 align_items="flex-start",
                 padding="1em",
-
             ),
         ),
         display="flex",
