@@ -14,7 +14,7 @@ import psycopg2
 from psycopg2.extras import execute_values
 
 
-conn = psycopg2.connect(os.environ['DATABASE_URL'])
+conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='verify-full', sslrootcert='system')
 
 
 class Auth:
