@@ -30,7 +30,7 @@ class State(rx.State):
     The base state is used to store general vars used throughout the app.
     """
 
-    dummy_data = [
+    email_data: list[dict] = [
         {
             "sender": "GitGuardian <security@getgitguardian.com>",
             "snippet": "GitGuardian has detected the following Google OAuth2 Keys exposed within your GitHub account. Details - Secret type: Google OAuth2 Keys - Repository: Joshtray/bubblify - Pushed date: October 29th 2023,",
@@ -164,7 +164,6 @@ class State(rx.State):
     current_password: str = ""
     authenticated_user: bool = False
     have_emails: bool = False
-    email_data: list[dict] = []
 
     prev_index: int = 0
     prev_diameter: float = 0
@@ -180,7 +179,7 @@ class State(rx.State):
         """
 
         clusters = {}
-        for message in self.dummy_data:
+        for message in self.email_data:
             if message["category_name"] not in clusters:
                 clusters[message["category_name"]] = []
             clusters[message["category_name"]].append(message)
