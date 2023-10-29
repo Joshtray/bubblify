@@ -12,14 +12,24 @@ from bubblify import styles
 
 from .utils.auth import Auth
 
-from bubblify.helpers.sql_helpers import get_json_from_database, create_categories, insert_email_info, execute_sql_query, conn, insert_categorized_email, create_emails_info_table
+from bubblify.helpers.sql_helpers import (
+    get_json_from_database,
+    create_categories,
+    insert_email_info,
+    execute_sql_query,
+    conn,
+    insert_categorized_email,
+    create_emails_info_table,
+)
 from quickstart import main
+
 
 class State(rx.State):
     """Base state for the app.
 
     The base state is used to store general vars used throughout the app.
     """
+
     dummy_data = [
         {
             "sender": "GitGuardian <security@getgitguardian.com>",
@@ -27,7 +37,7 @@ class State(rx.State):
             "subject": "[Joshtray/bubblify] Google OAuth2 Keys exposed on GitHub",
             "date_received": "2023-10-28",
             "unread": False,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "John Doe <john.doe@example.com>",
@@ -35,7 +45,7 @@ class State(rx.State):
             "subject": "Project Progress",
             "date_received": "2023-10-27",
             "unread": True,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "Alice Smith <alice.smith@example.com>",
@@ -43,7 +53,7 @@ class State(rx.State):
             "subject": "Meeting Reminder",
             "date_received": "2023-10-26",
             "unread": False,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "Support Team <support@example.com>",
@@ -51,7 +61,7 @@ class State(rx.State):
             "subject": "Support Ticket Resolution",
             "date_received": "2023-10-25",
             "unread": False,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "Jane Williams <jane.williams@example.com>",
@@ -59,7 +69,7 @@ class State(rx.State):
             "subject": "Weekly Report",
             "date_received": "2023-10-24",
             "unread": True,
-            "category_name": "INBOX"
+            "category_name": "INBOX",
         },
         {
             "sender": "Free Offers <offers@example.com>",
@@ -67,7 +77,7 @@ class State(rx.State):
             "subject": "Free Cruise Offer",
             "date_received": "2023-10-27",
             "unread": False,
-            "category_name": "Spam"
+            "category_name": "Spam",
         },
         {
             "sender": "Growth Hacks <hacks@example.com>",
@@ -75,7 +85,7 @@ class State(rx.State):
             "subject": "Investment Opportunity",
             "date_received": "2023-10-26",
             "unread": False,
-            "category_name": "Spam"
+            "category_name": "Spam",
         },
         {
             "sender": "Unsolicited Newsletter <newsletter@example.com>",
@@ -83,7 +93,7 @@ class State(rx.State):
             "subject": "Weekly Newsletter",
             "date_received": "2023-10-25",
             "unread": False,
-            "category_name": "Spam"
+            "category_name": "Spam",
         },
         {
             "sender": "Amazon Deals <deals@amazon.com>",
@@ -91,7 +101,7 @@ class State(rx.State):
             "subject": "Amazon Promotions",
             "date_received": "2023-10-28",
             "unread": False,
-            "category_name": "Promotions"
+            "category_name": "Promotions",
         },
         {
             "sender": "Tech Store <info@techstore.com>",
@@ -99,7 +109,7 @@ class State(rx.State):
             "subject": "Tech Store Promotion",
             "date_received": "2023-10-27",
             "unread": False,
-            "category_name": "Promotions"
+            "category_name": "Promotions",
         },
         {
             "sender": "Fashion Outlet <sales@fashionoutlet.com>",
@@ -107,7 +117,7 @@ class State(rx.State):
             "subject": "Fashion Outlet Sale",
             "date_received": "2023-10-26",
             "unread": False,
-            "category_name": "Promotions"
+            "category_name": "Promotions",
         },
         {
             "sender": "Travel Discounts <info@traveldiscounts.com>",
@@ -115,7 +125,7 @@ class State(rx.State):
             "subject": "Travel Discounts",
             "date_received": "2023-10-25",
             "unread": False,
-            "category_name": "Promotions"
+            "category_name": "Promotions",
         },
         {
             "sender": "Food Delivery <offers@fooddelivery.com>",
@@ -123,10 +133,9 @@ class State(rx.State):
             "subject": "Food Delivery Discount",
             "date_received": "2023-10-24",
             "unread": False,
-            "category_name": "Promotions"
-        }
+            "category_name": "Promotions",
+        },
     ]
-
 
     clusters: list[tuple[str, int, list, float, float, float]] = []
     index_index: int = 0
@@ -139,15 +148,23 @@ class State(rx.State):
     color_index: int = 7
     z_index_index: int = 8
 
-    colors: list[str] = ["#d27cbf", "#d2bf7c", "#7cb3d2", "#7cd2be", "#d27c7c", "#7cd2b3", "#d27cbf", "#7cbfd2"]
-    cluster_names : list[str] = ["Work", "School"]
-    new_cluster_name : str = ""
+    colors: list[str] = [
+        "#d27cbf",
+        "#d2bf7c",
+        "#7cb3d2",
+        "#7cd2be",
+        "#d27c7c",
+        "#7cd2b3",
+        "#d27cbf",
+        "#7cbfd2",
+    ]
+    cluster_names: list[str] = ["Work", "School"]
+    new_cluster_name: str = ""
     current_email: str = ""
     current_password: str = ""
     authenticated_user: bool = False
     have_emails: bool = False
     email_data: list[dict] = []
-    
 
     prev_index: int = 0
     prev_diameter: float = 0
@@ -171,8 +188,21 @@ class State(rx.State):
         diameters = self.get_diameters(clusters)
         positions = self.get_positions(clusters, diameters)
         colors = self.get_colors(clusters)
-        self.clusters = [(i, name, len(clusters[name]), clusters[name], diameters[i], positions[i][0], positions[i][1], colors[i], 1) for i, name in enumerate(clusters)]
-    
+        self.clusters = [
+            (
+                i,
+                name,
+                len(clusters[name]),
+                clusters[name],
+                diameters[i],
+                positions[i][0],
+                positions[i][1],
+                colors[i],
+                1,
+            )
+            for i, name in enumerate(clusters)
+        ]
+
     def get_diameters(self, clusters):
         """Get the diameters of the clusters.
 
@@ -183,11 +213,11 @@ class State(rx.State):
         min_size = styles.min_bubble_size
         max_size = 1200 / n
         mean = sum([len(clusters[cluster]) for cluster in clusters]) / len(clusters)
-        deviations = [(len(clusters[cluster]) - mean)/mean for cluster in clusters]
-        diff = (max_size - min_size)/2
-        avg_diam = (max_size + min_size)/2
+        deviations = [(len(clusters[cluster]) - mean) / mean for cluster in clusters]
+        diff = (max_size - min_size) / 2
+        avg_diam = (max_size + min_size) / 2
         return [((dev * diff) + avg_diam) for dev in deviations]
-    
+
     def get_positions(self, clusters, diameters):
         """Get the positions of the clusters.
 
@@ -196,22 +226,26 @@ class State(rx.State):
         """
         positions = []
         n = len(clusters)
-        x_ranges = [(-600 + i*(1200/n), -600 + (i+1)*(1200/n)) for i in range(n)]
+        x_ranges = [
+            (-600 + i * (1200 / n), -600 + (i + 1) * (1200 / n)) for i in range(n)
+        ]
 
         for i in range(n):
             diameter = diameters[i]
 
             x_range_ind = random.choice(range(len(x_ranges)))
 
-            x = random.uniform(x_ranges[x_range_ind][0], x_ranges[x_range_ind][1] - diameter)
+            x = random.uniform(
+                x_ranges[x_range_ind][0], x_ranges[x_range_ind][1] - diameter
+            )
 
             x_ranges.pop(x_range_ind)
 
-            y = random.uniform(-(800 - diameter)/2, (800 - diameter)/2)
-            
-            positions.append((str(x) + "px", str(y - (diameter/2)) + "px"))
+            y = random.uniform(-(800 - diameter) / 2, (800 - diameter) / 2)
+
+            positions.append((str(x) + "px", str(y - (diameter / 2)) + "px"))
         return positions
-    
+
     def get_colors(self, clusters):
         """Get the colors of the clusters.
 
@@ -219,7 +253,7 @@ class State(rx.State):
             The colors.
         """
         return random.sample(self.colors, k=len(clusters))
-    
+
     def mouse_enter(self, cluster):
         """Mouse enter the bubble.
 
@@ -231,7 +265,7 @@ class State(rx.State):
             new_cluster[self.diameter_index] = cluster[self.diameter_index] * 1.1
 
             self.clusters[cluster[self.index_index]] = tuple(new_cluster)
-    
+
     def mouse_leave(self, cluster):
         """Mouse leave the bubble.
 
@@ -243,8 +277,7 @@ class State(rx.State):
             new_cluster[self.diameter_index] = cluster[self.diameter_index] / 1.1
 
             self.clusters[cluster[self.index_index]] = tuple(new_cluster)
-    
-    
+
     def bubble_click(self, cluster):
         """Click the bubble.
 
@@ -274,7 +307,7 @@ class State(rx.State):
         """
         if not self.in_focus:
             return
-        
+
         self.in_focus = False
         cluster = self.clusters[self.prev_index]
         new_cluster = list(cluster)
@@ -284,16 +317,16 @@ class State(rx.State):
         new_cluster[self.z_index_index] = 1
 
         self.clusters[cluster[self.index_index]] = tuple(new_cluster)
-    
+
     def add_cluster(self, cluster_name):
         """
         Args:
             cluster_name: The name of the cluster to add.
         """
-        if cluster_name not in self.clusters:    
+        if cluster_name not in self.clusters:
             self.clusters[cluster_name] = []
             self.cluster_names.append(cluster_name)
-    
+
     def delete_cluster(self, cluster_name):
         """
         Args:
@@ -304,15 +337,14 @@ class State(rx.State):
                 self.clusters.pop(i)
                 self.cluster_names.pop(i)
                 break
-        
-    
+
     def set_new_cluster_name(self, new_cluster_name):
         """
         Args:
             new_cluster_name: The new cluster name.
         """
         self.new_cluster_name = new_cluster_name
-    
+
     def login(self, email, password):
         """
         Args:
@@ -326,19 +358,19 @@ class State(rx.State):
             else:
                 rx.alert("Incorrect password")
         else:
-            print('user does not exist')
+            print("user does not exist")
             if email != "" and password != "":
                 Auth.create_new_user(email, password)
                 self.authenticated_user = True
-                print('This happened')
+                print("This happened")
                 rx.redirect("/", True)
-    
+
     def logout(self):
         self.authenticated_user = False
 
     def connect_google(self):
-        if os.path.exists('token.json'):
-            os.remove('token.json')
+        if os.path.exists("token.json"):
+            os.remove("token.json")
         create_emails_info_table()
         main()
         self.email_data = get_json_from_database()
