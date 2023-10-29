@@ -11,5 +11,5 @@ import reflex as rx
 load_dotenv()
 
 # Create the app and compile it.
-app = rx.App()
+app = rx.App(styles=styles.base_style)
 app.compile()
