@@ -138,6 +138,7 @@ class State(rx.State):
     positiony_index: int = 6
     color_index: int = 7
     z_index_index: int = 8
+    unread_count_index: int = 9
 
     colors: list[str] = ["#d27cbf", "#d2bf7c", "#7cb3d2", "#7cd2be", "#d27c7c", "#7cd2b3", "#d27cbf", "#7cbfd2"]
     cluster_names : list[str] = ["Work", "School"]
@@ -146,7 +147,112 @@ class State(rx.State):
     current_password: str = ""
     authenticated_user: bool = False
     have_emails: bool = False
-    email_data: list[dict] = []
+    email_data: list[dict] = [
+        {
+            "sender": "GitGuardian <security@getgitguardian.com>",
+            "snippet": "GitGuardian has detected the following Google OAuth2 Keys exposed within your GitHub account. Details - Secret type: Google OAuth2 Keys - Repository: Joshtray/bubblify - Pushed date: October 29th 2023,",
+            "subject": "[Joshtray/bubblify] Google OAuth2 Keys exposed on GitHub",
+            "date_received": "2023-10-28",
+            "unread": False,
+            "category_name": "INBOX"
+        },
+        {
+            "sender": "John Doe <john.doe@example.com>",
+            "snippet": "Hello, just checking in on our project progress. How's it going?",
+            "subject": "Project Progress",
+            "date_received": "2023-10-27",
+            "unread": True,
+            "category_name": "INBOX"
+        },
+        {
+            "sender": "Alice Smith <alice.smith@example.com>",
+            "snippet": "Meeting reminder for next week. Don't forget to prepare the presentation.",
+            "subject": "Meeting Reminder",
+            "date_received": "2023-10-26",
+            "unread": False,
+            "category_name": "INBOX"
+        },
+        {
+            "sender": "Support Team <support@example.com>",
+            "snippet": "Your support ticket #12345 has been resolved. If you have any more questions, feel free to ask.",
+            "subject": "Support Ticket Resolution",
+            "date_received": "2023-10-25",
+            "unread": False,
+            "category_name": "INBOX"
+        },
+        {
+            "sender": "Jane Williams <jane.williams@example.com>",
+            "snippet": "Weekly report attached. Please review and provide feedback.",
+            "subject": "Weekly Report",
+            "date_received": "2023-10-24",
+            "unread": True,
+            "category_name": "INBOX"
+        },
+        {
+            "sender": "Free Offers <offers@example.com>",
+            "snippet": "Congratulations! You've won a free cruise vacation. Click here to claim your prize!",
+            "subject": "Free Cruise Offer",
+            "date_received": "2023-10-27",
+            "unread": False,
+            "category_name": "Spam"
+        },
+        {
+            "sender": "Growth Hacks <hacks@example.com>",
+            "snippet": "Get rich quick with our amazing investment opportunity. Don't miss out!",
+            "subject": "Investment Opportunity",
+            "date_received": "2023-10-26",
+            "unread": False,
+            "category_name": "Spam"
+        },
+        {
+            "sender": "Unsolicited Newsletter <newsletter@example.com>",
+            "snippet": "You're receiving this email because you subscribed to our newsletter. To unsubscribe, click here.",
+            "subject": "Weekly Newsletter",
+            "date_received": "2023-10-25",
+            "unread": False,
+            "category_name": "Spam"
+        },
+        {
+            "sender": "Amazon Deals <deals@amazon.com>",
+            "snippet": "Check out our latest deals and discounts on electronics, clothing, and more!",
+            "subject": "Amazon Promotions",
+            "date_received": "2023-10-28",
+            "unread": False,
+            "category_name": "Promotions"
+        },
+        {
+            "sender": "Tech Store <info@techstore.com>",
+            "snippet": "Exclusive offer for tech enthusiasts: 20% off on all gadgets this week only!",
+            "subject": "Tech Store Promotion",
+            "date_received": "2023-10-27",
+            "unread": False,
+            "category_name": "Promotions"
+        },
+        {
+            "sender": "Fashion Outlet <sales@fashionoutlet.com>",
+            "snippet": "New arrivals and special discounts on fashion items. Shop now!",
+            "subject": "Fashion Outlet Sale",
+            "date_received": "2023-10-26",
+            "unread": False,
+            "category_name": "Promotions"
+        },
+        {
+            "sender": "Travel Discounts <info@traveldiscounts.com>",
+            "snippet": "Plan your next vacation with our exclusive travel deals and discounts!",
+            "subject": "Travel Discounts",
+            "date_received": "2023-10-25",
+            "unread": False,
+            "category_name": "Promotions"
+        },
+        {
+            "sender": "Food Delivery <offers@fooddelivery.com>",
+            "snippet": "Get 10% off on your next food delivery order. Use code: DELICIOUS10",
+            "subject": "Food Delivery Discount",
+            "date_received": "2023-10-24",
+            "unread": False,
+            "category_name": "Promotions"
+        }
+    ]
     
 
     prev_index: int = 0
@@ -163,7 +269,7 @@ class State(rx.State):
         """
 
         clusters = {}
-        for message in self.dummy_data:
+        for message in self.email_data:
             if message["category_name"] not in clusters:
                 clusters[message["category_name"]] = []
             clusters[message["category_name"]].append(message)
@@ -171,7 +277,8 @@ class State(rx.State):
         diameters = self.get_diameters(clusters)
         positions = self.get_positions(clusters, diameters)
         colors = self.get_colors(clusters)
-        self.clusters = [(i, name, len(clusters[name]), clusters[name], diameters[i], positions[i][0], positions[i][1], colors[i], 1) for i, name in enumerate(clusters)]
+        unread_counts = self.get_unread_count(clusters)
+        self.clusters = [(i, name, len(clusters[name]), clusters[name], diameters[i], positions[i][0], positions[i][1], colors[i], 1, unread_counts[i]) for i, name in enumerate(clusters)]
     
     def get_diameters(self, clusters):
         """Get the diameters of the clusters.
@@ -219,6 +326,14 @@ class State(rx.State):
             The colors.
         """
         return random.sample(self.colors, k=len(clusters))
+    
+    def get_unread_count(self, clusters):
+        """Get the unread count of the cluster.
+
+        Returns:
+            The unread count.
+        """
+        return [len([message for message in clusters[cluster] if message["unread"]]) for cluster in clusters]
     
     def mouse_enter(self, cluster):
         """Mouse enter the bubble.
