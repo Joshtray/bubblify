@@ -2,17 +2,22 @@
 
 from bubblify import styles
 from bubblify.templates import template
+from bubblify.state import State
+from bubblify.components.bubble import bubble
 
 import reflex as rx
 
-
-@template(route="/", title="Home", image="/github.svg")
+@template(route="/", title="Home", image="/home.svg", on_load=State.get_clusters)
 def index() -> rx.Component:
     """The home page.
 
     Returns:
         The UI for the home page.
     """
-    with open("README.md", encoding="utf-8") as readme:
-        content = readme.read()
-    return rx.markdown(content, component_map=styles.markdown_style)
+    
+    return rx.vstack(
+        rx.foreach(State.clusters, bubble),
+        width="100%",
+        height="100%",
+        position="relative",
+    )

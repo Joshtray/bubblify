@@ -1,10 +1,17 @@
 *.db
 *.py[cod]
+.env
 .web
 __pycache__/
+credentials.json
+google-chrome-stable_current_amd64.deb
+token.json
 venv/
+<<<<<<< HEAD
 .env
 credentials.json
 token.json
 certs/ca.crt
 my-safe-directory/ca.key
+=======
+>>>>>>> main

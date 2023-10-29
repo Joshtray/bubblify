@@ -108,19 +108,20 @@ def template(
         )
         def templated_page():
             return rx.hstack(
-                sidebar(),
                 rx.box(
+                    sidebar(),
                     rx.box(
                         page_content(),
                         **styles.template_content_style,
                     ),
                     **styles.template_page_style,
                 ),
-                rx.spacer(),
-                menu_button(),
+                display="flex",
                 align_items="flex-start",
                 transition="left 0.5s, width 0.5s",
                 position="relative",
+                width="100%",
+                height="100%",
             )
 
         return templated_page
