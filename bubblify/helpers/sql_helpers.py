@@ -13,7 +13,7 @@ import psycopg2
 from psycopg2.extras import execute_values
 
 # load_dotenv()
-conn = psycopg2.connect(os.environ['DATABASE_URL'])
+conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='verify-full', sslrootcert='system')
 
 
 def create_emails_info_table():
