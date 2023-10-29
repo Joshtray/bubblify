@@ -66,15 +66,25 @@ def create_categories(conn, labels):
 
     return category_ids
 
+def insert_final_emails_table(conn):
+    with conn.cursor() as cur:
+        insert_query = """
+        INSERT INTO final_emails_table (subject, snippet, sender, date_received, unread, category_name)
+        SELECT subject, snippet, sender, date_received, unread, name
+        FROM emails_info ei
+        JOIN categorized_emails ca ON ei.id = ca.email_id
+        JOIN categories c ON ca.category_id = c.id;
+        """
+        cur.execute(insert_query)
+        conn.commit()
+
+
 def get_json_from_database():
 
     # Assuming you have the 'conn' connection object already established
     with conn.cursor() as cur:
         cur.execute("""
-        SELECT subject, snippet, sender, date_received, unread, name
-        FROM emails_info ei
-        JOIN categorized_emails ca ON ei.id = ca.email_id
-        JOIN categories c ON ca.category_id = c.id;
+        SELECT * FROM final_emails_table;
         """)
 
         result = cur.fetchall()
