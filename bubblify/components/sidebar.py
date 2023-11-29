@@ -76,7 +76,7 @@ def sidebar() -> rx.Component:
                         rx.image(
                             src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Refresh_icon.png",
                         ),
-                        on_click=State.categorize,
+                        on_click=State.categorize_minds,
                     ),
                     border_radius="50%",
                     box_shadow=styles.box_shadow,

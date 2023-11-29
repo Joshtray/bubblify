@@ -1,5 +1,7 @@
 """Base state for the app."""
 
+import re
+
 from langchain.chat_models import ChatOpenAI
 
 import os
@@ -13,6 +15,8 @@ import random
 from bubblify import styles
 
 from .utils.auth import Auth
+
+from bubblify.queries.python_queries import classify_emails
 
 from bubblify.helpers.sql_helpers import (
     get_json_from_database,
@@ -153,6 +157,7 @@ class State(rx.State):
     color_index: int = 7
     z_index_index: int = 8
     unread_count_index: int = 9
+    messages: list[list[tuple[str]]] = []
 
     colors: list[str] = [
         "#d27cbf",
@@ -295,6 +300,25 @@ class State(rx.State):
             if message["category_name"] not in clusters:
                 clusters[message["category_name"]] = []
             clusters[message["category_name"]].append(message)
+
+        for category in clusters:
+            msgs = []
+            for msg in clusters[category]:
+                msgs.append(
+                    (
+                        msg["snippet"],
+                        msg["sender"],
+                        msg["date_received"],
+                        msg["subject"],
+                        msg["unread"],
+                    )
+                )
+
+            self.messages.append(msgs)
+
+        print(self.messages)
+
+        output = self.messages
 
         diameters = self.get_diameters(clusters)
         positions = self.get_positions(clusters, diameters)
@@ -498,7 +522,8 @@ class State(rx.State):
         main()
         self.email_data = get_json_from_database()
         self.have_emails = True
-        self.categorize()
+        # self.categorize()
+        self.categorize_minds()
 
     def categorize(self):
         # Doing this in chunks of 10 emails at a time
@@ -522,23 +547,24 @@ class State(rx.State):
             for j in range(len(response)):
                 self.email_data[i + j]["category_name"] = response[j]
 
-        # for i, email in enumerate(self.email_data):
-        #     prompt = f"""
-        #     For the following email, please categorize it as one of the following:
-        #     {self.cluster_names}
+        self.get_clusters()
 
-        #     Email: {email['snippet']}\n
-        #     Sender: {email['sender']}\n
-        #     Subject: {email['subject']}\n
-        #     Date: {email['date_received']}\n
-        #     Unread: {email['unread']}\n
+    step_size = 10
 
-        #     Return only the category name in the following format:
+    def categorize_minds(self):
+        for i in range(0, len(self.email_data), self.step_size):
+            data = self.email_data[i : i + self.step_size]
+            for j in range(len(data)):
+                new_snippet = re.sub("\W+", " ", data[j]["snippet"])
+                new_subject = re.sub("\W+", " ", data[j]["subject"])
+                new_sender = re.sub("\W+", " ", data[j]["sender"])
+                data[j]["snippet"] = new_snippet
+                data[j]["subject"] = new_subject
+                data[j]["sender"] = new_sender
 
-        #     <category_name>
-        #     """
+            response = classify_emails(data, self.cluster_names)
 
-        #     response = llm.predict(prompt)
-        #     self.email_data[i]["category_name"] = response
+            for j in range(len(response)):
+                self.email_data[i + j]["category_name"] = response[j]
 
         self.get_clusters()
